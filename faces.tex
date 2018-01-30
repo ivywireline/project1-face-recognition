@@ -1,0 +1,434 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Programming/Coding Assignment
+% LaTeX Template
+%
+% This template has been downloaded from:
+% http://www.latextemplates.com
+%
+% Original author:
+% Ted Pavlic (http://www.tedpavlic.com)
+%
+% Note:
+% The \lipsum[#] commands throughout this template generate dummy text
+% to fill the template out. These commands should all be removed when
+% writing assignment content.
+%
+% This template uses a Perl script as an example snippet of code, most other
+% languages are also usable. Configure them in the "CODE INCLUSION
+% CONFIGURATION" section.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage[usenames,dvipsnames]{color} % Required for custom colors
+\usepackage{graphicx} % Required to insert images
+\usepackage{subcaption}
+\usepackage{listings} % Required for insertion of code
+\usepackage{courier} % Required for the courier font
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+\usepackage{placeins}
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1} % Line spacing
+
+% Set up the header and footer
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName} % Top left header
+\chead{\hmwkClass\ (\hmwkClassTime): \hmwkTitle} % Top center head
+%\rhead{\firstxmark} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\cfoot{} % Bottom center footer
+\rfoot{Page\ \thepage\ of\ \protect\pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+%----------------------------------------------------------------------------------------
+%	CODE INCLUSION CONFIGURATION
+%----------------------------------------------------------------------------------------
+
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0} % This is the color used for comments
+\lstloadlanguages{Perl} % Load Perl syntax for listings, for a list of other languages supported see: ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf
+\lstset{language=Python, % Use Perl in this example
+        frame=single, % Single frame around code
+        basicstyle=\small\ttfamily, % Use small true type font
+        keywordstyle=[1]\color{Blue}\bf, % Perl functions bold and blue
+        keywordstyle=[2]\color{Purple}, % Perl function arguments purple
+        keywordstyle=[3]\color{Blue}\underbar, % Custom functions underlined and blue
+        identifierstyle=, % Nothing special about identifiers
+        breaklines=true, % no text overflow
+        commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, % Comments small dark green courier font
+        stringstyle=\color{Purple}, % Strings are purple
+        showstringspaces=false, % Don't put marks in string spaces
+        tabsize=5, % 5 spaces per tab
+        %
+        % Put standard Perl functions not included in the default language here
+        morekeywords={rand},
+        %
+        % Put Perl function parameters here
+        morekeywords=[2]{on, off, interp},
+        %
+        % Put user defined functions here
+        morekeywords=[3]{test},
+       	%
+        morecomment=[l][\color{Blue}]{...}, % Line continuation (...) like blue comment
+        numbers=left, % Line numbers on left
+        firstnumber=1, % Line numbers start with line 1
+        numberstyle=\tiny\color{Blue}, % Line numbers are blue and small
+        stepnumber=5 % Line numbers go in steps of 5
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\perlscript}[2]{
+\begin{itemize}
+\item[]\lstinputlisting[caption=#2,label=#1]{#1.pl}
+\end{itemize}
+}
+
+\captionsetup{justification=raggedright,singlelinecheck=false}
+%----------------------------------------------------------------------------------------
+%	DOCUMENT STRUCTURE COMMANDS
+%	Skip this unless you know what you're doing
+%----------------------------------------------------------------------------------------
+
+% Header and footer for when a page split occurs within a problem environment
+\newcommand{\enterProblemHeader}[1]{
+%\nobreak\extramarks{#1}{#1 continued on next page\ldots}\nobreak
+%\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+}
+
+% Header and footer for when a page split occurs between problem environments
+\newcommand{\exitProblemHeader}[1]{
+%\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+%\nobreak\extramarks{#1}{}\nobreak
+}
+
+\setcounter{secnumdepth}{1} % Removes default section numbers
+\newcounter{homeworkProblemCounter} % Creates a counter to keep track of the number of problems
+\setcounter{homeworkProblemCounter}{0}
+
+\newcommand{\homeworkProblemName}{}
+\newenvironment{homeworkProblem}[1][Problem \arabic{homeworkProblemCounter}]{ % Makes a new environment called homeworkProblem which takes 1 argument (custom name) but the default is "Problem #"
+\stepcounter{homeworkProblemCounter} % Increase counter for number of problems
+\renewcommand{\homeworkProblemName}{#1} % Assign \homeworkProblemName the name of the problem
+\section{\homeworkProblemName} % Make a section in the document with the custom problem count
+\enterProblemHeader{\homeworkProblemName} % Header and footer within the environment
+}{
+\exitProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+\newcommand{\problemAnswer}[1]{ % Defines the problem answer command with the content as the only argument
+\noindent\framebox[\columnwidth][c]{\begin{minipage}{0.98\columnwidth}#1\end{minipage}} % Makes the box around the problem answer and puts the content inside
+}
+
+\newcommand{\homeworkSectionName}{}
+\newenvironment{homeworkSection}[1]{ % New environment for sections within homework problems, takes 1 argument - the name of the section
+\renewcommand{\homeworkSectionName}{#1} % Assign \homeworkSectionName to the name of the section from the environment argument
+\subsection{\homeworkSectionName} % Make a subsection with the custom name of the subsection
+\enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]} % Header and footer within the environment
+}{
+\enterProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CLASS SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\hmwkTitle}{Face Classification with Regression} % Assignment title
+\newcommand{\hmwkDueDate}{Friday,\ January\ 29,\ 2018} % Due date
+\newcommand{\hmwkClass}{CSC411 Project 1} % Course/class
+\newcommand{\hmwkClassTime}{L0101} % Class/lecture time
+\newcommand{\hmwkAuthorName}{Hao Hui Tan} % Your name
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{
+\vspace{2in}
+\textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+\normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate}\\
+\vspace{0.1in}
+\vspace{3in}
+}
+
+\author{\textbf{\hmwkAuthorName}}
+%\date{} % Insert date here if you want it to appear below your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+\clearpage
+%----------------------------------------------------------------------------------------
+%	PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+% To have just one problem per page, simply put a \clearpage after each problem
+
+\begin{homeworkProblem}
+
+\noindent \textit{Dataset description}
+
+I have downloaded $1691$ uncropped images of well-known actors and actresses from FaceScrub using the \textbf{get\_data.py} script.  Figures 1, 2 and 3 shows the uncropped images of Peri Gilpin, Steve Carell and Lorrain Bracco respectively. Figures 4, 5 and 6 show the cropped images of these individuals. In the \textbf{get\_data.py} script I have transformed the raw images in the uncropped folder to grayscale, resized them to 32x32 and cropped them to the faces using the bounded box values. \newline
+
+Due to the unfortunate use of \textbf{imsave} function from the \textbf{pylab} library in the \textbf{get\_data.py} script, the cropped
+images I got was of the shape (32, 32, 4) instead of (32, 32). As a result,
+when these images are opened using imread I got 4096 pixels instead of 1024 (32x32) due to the extra channel the cropped images has. To remedy the situation, whenever I read the cropped images, I always slice the images through [:, :, 0] in order to get rid of the extra channel and read the images as 32x32 for the purpose of this assignment. \newline
+
+As one can see, the cropped out images and the bounding boxes are fairly accurate in cropping out the faces. The bounding boxes values are slightly off in figure 6 because the person in the picture is not facing straight to the camera. The cropped out faces can be aligned with each other for figure 4 and figure 5. Figure 6, as mentioned, is slightly off to the left of the centre than those 2 images.
+
+
+\begin{figure}[h!]
+    \includegraphics[scale=0.5]{gilpin0.jpg}
+    \caption{Peri Gilpin - uncropped}
+    \label{fig:gilpin}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[scale=0.5]{carell1.jpg}
+    \caption{Steve Carell - uncropped}
+    \label{fig:carell}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[scale=0.5]{bracco0.jpg}
+    \caption{Lorraine Bracco - uncropped}
+    \label{fig:bracco}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{cropped/gilpin0.jpg}
+    \caption{Peri Gilpin - cropped}
+    \label{fig:gilpin_cropped}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{cropped/carell1.jpg}
+    \caption{Steve Carell - cropped}
+    \label{fig:carell_cropped}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{cropped/bracco0.jpg}
+    \caption{Lorraine Bracco - cropped}
+    \label{fig:bracco_cropped}
+\end{figure}
+
+\end{homeworkProblem}
+\clearpage
+%----------------------------------------------------------------------------------------
+%	PROBLEM 2
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\noindent \textit{Applying an algorithm: initial exploration.}
+
+I have used the shuffle\_images function to separate the images into training set, validation set and test set. I have used dictionaries to store these images where the key is the actor or actress' last name and the value corresponding to the key is the list of his/her images. There are 70 images in the training set, 10 in validation set and 10 in the test set. My algorithm to achieve such a goal is to first put all the cropped image names into an array and then use \textbf{np.random.shuffle()} function to ensure they are out of order. Then I would iterate over all the actors/actresses, and for each actor/actress, I would iterate through all the images available and check if the actor/actress name is in each image's name. If it is, I would add the image to the list of images in the dictionaries with the actor/actress's last name being the dictionary key.
+
+\end{homeworkProblem}
+\clearpage
+%----------------------------------------------------------------------------------------
+%	PROBLEM 3
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\noindent \textbf{The cost function that I minimized}
+
+\[J(\theta) = \sum_{i=1}^{m} (h_{\theta}(x^{i}) - y^{i})^{2}\]
+
+where $\theta$ is the vector of weights we seek to minimize
+      $x^{i}$ is the set of pixel features of the $i^{th}$ image sample
+      $m$ is the number of image samples
+      $h_{\theta}(x^{i})$ is the hypothesis function with respect to $x^{i}$
+      $y^{i}$ is the label of the $i^{th}$ image sample where $y^{i} = 1$ represents the image is Alec Baldwin and $y^{i} = 0$ represents the image is Steve Carell
+\newline
+
+The following values can be generated and seen in the \textbf{part\_3\_data\_file.txt}:
+\newline
+The cost function value for the training set is 3.88284886092
+The cost function value for the validation set is 1.31082594721
+The performance of the classifier (percent accuracy) on the training set is 0.985714285714
+The performance of the classifier (percent accuracy) on the validation set is 0.95
+\newline
+
+\begin{lstlisting}
+def binary_classify(performer_1_full, performer_2_full,  training_samples_num=70, alpha=0.0000010, init_theta_coefficient=0):
+    """Inputs are 2 actors' last names to classify
+       Returns the trained thetas array for the hypothesis and the cost function values
+       for the training and validation sets
+    """
+    performer_1 = performer_1_full.split(" ")[1].lower()
+    performer_2 = performer_2_full.split(" ")[1].lower()
+    if performer_1_full in actors:
+        path_1 = "cropped/actors/"
+    else:
+        path_1 = "cropped/actresses/"
+
+    if performer_2_full in actors:
+        path_2 = "cropped/actors/"
+    else:
+        path_2 = "cropped/actresses/"
+    # Training images for alec baldwin and steve Carel
+    performer_1_training_set = training_dictionary[performer_1]
+    performer_2_training_set = training_dictionary[performer_2]
+    performer_1_validation_set = validation_dictionary[performer_1]
+    performer_2_validation_set = validation_dictionary[performer_2]
+    training_set = []
+    validation_set = []
+    performer_1_num_images = 0
+    performer_2_num_images = 0
+    performer_1_num_images_validation = 0
+    performer_2_num_images_validation = 0
+
+    for image_name in performer_1_training_set:
+        if performer_1_num_images > training_samples_num:
+            break
+        path = path_1 + image_name
+        image_file = imread(path)[:, :, 0]
+        # Get the flatten image of inputs
+        flatten_image = image_file.flatten()
+        flatten_image_processed = flatten_image / 255.0  # so that each input is between 0 and 1
+        training_set.append(flatten_image_processed) # training set 2D array
+        performer_1_num_images = performer_1_num_images + 1
+
+    for image_name in performer_2_training_set:
+        if performer_1_num_images > training_samples_num:
+            break
+        path = path_2 + image_name
+        image_file = imread(path)[:, :, 0]
+        # Get the flatten image of inputs
+        flatten_image = image_file.flatten()
+        flatten_image_processed = flatten_image / 255.0  # so that each input is between 0 and 1
+        training_set.append(flatten_image_processed) # training set 2D array
+        performer_2_num_images = performer_2_num_images + 1
+
+    for image_name in performer_1_validation_set:
+        if performer_1_num_images_validation > training_samples_num:
+            break
+        path = path_1 + image_name
+        image_file = imread(path)[:, :, 0]
+        # Get the flatten image of inputs
+        flatten_image = image_file.flatten()
+        flatten_image_processed = flatten_image / 255.0  # so that each input is between 0 and 1
+        validation_set.append(flatten_image_processed) # training set 2D array
+        performer_1_num_images_validation = performer_1_num_images_validation + 1
+
+    for image_name in performer_2_validation_set:
+        if performer_2_num_images_validation > training_samples_num:
+            break
+        path = path_1 + image_name
+        image_file = imread(path)[:, :, 0]
+        # Get the flatten image of inputs
+        flatten_image = image_file.flatten()
+        flatten_image_processed = flatten_image / 255.0  # so that each input is between 0 and 1
+        validation_set.append(flatten_image_processed) # training set 2D array
+        performer_2_num_images_validation = performer_2_num_images_validation + 1
+
+    x_matrix = np.vstack(training_set) # input x matrix for gradient descent. 70 rows = 70 images. 4096 columns = pixels
+    x_matrix_validation = np.vstack(validation_set)
+    # print "sum of x_matrix is:", sum(x_matrix)
+    # print "init_theta_coefficient", init_theta_coefficient
+    initial_theta = init_theta_coefficient * np.ones(len(x_matrix[0])) # initial thetas for graident descent
+    y_vector = np.ones(performer_1_num_images) # 1 for alec baldwin, 0 for Steve Carell
+    y_vector = np.append(y_vector, np.zeros(performer_2_num_images))
+
+    y_vector_validation = np.append(np.ones(performer_1_num_images_validation), np.zeros(performer_2_num_images_validation))
+    result_theta = grad_descent(f, df, x_matrix.T, y_vector, initial_theta, alpha)
+    result_cost_training = f(x_matrix.T, y_vector, result_theta)
+    result_cost_validation = f(x_matrix_validation.T, y_vector_validation, result_theta)
+    return result_theta, result_cost_training, result_cost_validation
+\end{lstlisting}
+
+\textbf{Description of the process to get the code to work}
+\newline
+I am using the python functions $f$, $df$ and $grad_descent$ from the tutorial code. As I am building the classifier, there were dimension misalignment issues. I had to use the x\_matrix transpose to solve the issue. At first, my alpha was 0.1. I run into the RuntimeWarning: overflow encountered in multiply error. It seems to suggest that the alpha is too large and as a result gradient descent overshoots the minima multiple times and as a result it could not converge. I began to experiment with smaller alphas and eventually chose the alpha value of 0.0000010 as the default. I chose it because it is one of the smallest values for the code to not run forever and it gives a decent set of $\theta$ values for the prediction.
+
+\end{homeworkProblem}
+\clearpage
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 4
+%----------------------------------------------------------------------------------------
+
+\begin{homeworkProblem}
+\noindent \textbf{Part a)}
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{part_4a_full_training.jpg}
+    \caption{Thetas obtained from training using the full training set}
+    \label{fig:full_training}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{part_4a_2_samples_training.jpg}
+    \caption{Thetas obtained from training using 2 samples from the training set}
+    \label{fig:two_samples}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{part_4b_foggy_face.jpg}
+    \caption{Thetas obtained from training using full training set}
+    \label{fig:foggy_face}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{part_4b_new_start_theta.jpg}
+    \caption{Thetas obtained from training using full training set but with different start thetas}
+    \label{fig:new_start_theta}
+\end{figure}
+
+In figure 10, I used a new set of initial $\theta$ values of 0.5 instead of zeros. In figure 10, I just followed the normal procedure to produce the image.
+
+
+\end{homeworkProblem}
+\clearpage
+
+%----------------------------------------------------------------------------------------
+
+%	PROBLEM 5
+%----------------------------------------------------------------------------------------
+\begin{homeworkProblem}
+
+\noindent \textbf{Performance of the gender classifiers on the training and validation sets vs the size of the training set.}
+
+Note: For this training problem, I use $y = 1$ to denote the performer in the image is male and $y = 0$ to denote the image is female.
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{part_5_validation_training_plot.png}
+    \caption{performance of the classifiers on the training and validation sets vs the size of the training set.}
+    \label{fig:performance_gender}
+\end{figure}
+
+The following is the performance of the 6 actors who are not included in the original \textbf{act} set. The results are generated and seen in \textbf{part\_5\_different\_performer\_accuracies.txt} file.
+\newline
+
+Gerard Butler Accuracy is: 0.978571428571 \newline
+Fran Drescher Accuracy is: 0.905882352941 \newline
+Michael Vartan Accuracy is: 0.68085106383 \newline
+America Ferrera Accuracy is: 0.939226519337 \newline
+Daniel Radcliffe Accuracy is: 0.789115646259 \newline
+Kristin Chenoweth Accuracy is: 0.795321637427 \newline
+
+
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+\end{document}
