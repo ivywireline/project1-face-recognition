@@ -427,6 +427,8 @@ def plot_performance_gender(actors, actresses, act, act_different, actors_differ
 
 if __name__ == "__main__":
 
+    np.random.seed(0)
+
     ## Split the images to training set, validation set and training set for part 2
     shuffle_images()
 

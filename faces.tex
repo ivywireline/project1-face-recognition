@@ -263,10 +263,10 @@ where $\theta$ is the vector of weights we seek to minimize
 
 The following values can be generated and seen in the \textbf{part\_3\_data\_file.txt}:
 \newline
-The cost function value for the training set is 3.88284886092
-The cost function value for the validation set is 1.31082594721
-The performance of the classifier (percent accuracy) on the training set is 0.985714285714
-The performance of the classifier (percent accuracy) on the validation set is 0.95
+The cost function value for the training set is 3.73786191455 \newline
+The cost function value for the validation set is 2.41870583942 \newline
+The performance of the classifier (percent accuracy) on the training set is 1.0 \newline
+The performance of the classifier (percent accuracy) on the validation set is 0.85
 \newline
 
 \begin{lstlisting}
@@ -420,12 +420,14 @@ Note: For this training problem, I use $y = 1$ to denote the performer in the im
 The following is the performance of the 6 actors who are not included in the original \textbf{act} set. The results are generated and seen in \textbf{part\_5\_different\_performer\_accuracies.txt} file.
 \newline
 
-Gerard Butler Accuracy is: 0.978571428571 \newline
-Fran Drescher Accuracy is: 0.905882352941 \newline
+Gerard Butler Accuracy is: 0.992857142857 \newline
+Fran Drescher Accuracy is: 0.882352941176 \newline
 Michael Vartan Accuracy is: 0.68085106383 \newline
-America Ferrera Accuracy is: 0.939226519337 \newline
-Daniel Radcliffe Accuracy is: 0.789115646259 \newline
-Kristin Chenoweth Accuracy is: 0.795321637427 \newline
+America Ferrera Accuracy is: 0.955801104972 \newline
+Daniel Radcliffe Accuracy is: 0.795918367347 \newline
+Kristin Chenoweth Accuracy is: 0.766081871345 \newline
+
+As one can see, there are clear signs of overfitting as the accuracies go down when one test the hypothesis on different actors and actresses that were not in the original actors and actresses sets for training.
 
 
 \end{homeworkProblem}
