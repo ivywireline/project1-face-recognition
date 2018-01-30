@@ -107,6 +107,7 @@ def f(x, y, theta):
 
 def df(x, y, theta):
     """The Gradient"""
+    print "x is ", x
     return -2*sum((y-dot(theta.T, x))*x, 1)
 
 def grad_descent(f, df, x, y, init_t, alpha, max_iter=10000):
@@ -424,6 +425,37 @@ def plot_performance_gender(actors, actresses, act, act_different, actors_differ
     plt.legend(loc="best")
     plt.savefig("part_5_validation_training_plot")
 
+def f_multiclass(x, y, theta):
+    """The multiclass cost function"""
+    return sum( (y - dot(theta.T,x)) ** 2)
+
+def df_multiclass(x, y, theta):
+    """The multiclass Gradient"""
+    return -2*(y-dot(theta.T, x))*x
+
+def part_6_finite_difference(f_multiclass, df_multiclass, k=4, init_theta_coefficient=0, alpha=0.0000010):
+    training_set = []
+    # Choose 5 images
+    path = "cropped/actors/"
+
+    for i in range(5):
+        image_name = training_dictionary["carell"][i]
+        path_image = path + image_name
+        image_file = imread(path_image)[:, :, 0]
+        # Get the flatten image of inputs
+        flatten_image = image_file.flatten()
+        flatten_image_processed = flatten_image / 255.0
+        training_set.append(flatten_image_processed)
+
+    x_matrix = np.vstack(training_set)
+    initial_theta = []
+    for i in range(k):
+        initial_theta_row = init_theta_coefficient * np.ones(len(x_matrix[0]))
+        initial_theta.append(initial_theta_row)
+    initial_theta = np.vstack(initial_theta)
+    y_vector = np.array([[0, 1, 0, 0] for i in range(5)])
+    return grad_descent(f_multiclass, df_multiclass, x_matrix, y_vector, initial_theta, alpha, max_iter=10000)
+
 
 if __name__ == "__main__":
 
@@ -435,52 +467,56 @@ if __name__ == "__main__":
     ## Set up the different_performer_dictionary for performers not in act
     set_up_images_for_different_performers()
 
-    ## Part 3 - Create a classifier and report performance scores
-    result_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell")
-    validation_score, training_score = get_performance_binary("Alec Baldwin", "Steve Carell", result_theta)
+    # ## Part 3 - Create a classifier and report performance scores
+    # result_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell")
+    # validation_score, training_score = get_performance_binary("Alec Baldwin", "Steve Carell", result_theta)
+    #
+    # print "Binary Classification Validation and training scores are respectively", validation_score, training_score
+    # print "result_cost_training, result_cost_validation", result_cost_training, result_cost_validation
+    # part_3_data_file = open("part_3_data_file.txt", "w")
+    # part_3_data_file.write("The cost function value for the training set is " + str(result_cost_training) + "\n")
+    # part_3_data_file.write("The cost function value for the validation set is " + str(result_cost_validation) + "\n")
+    # part_3_data_file.write("The performance of the classifier (percent accuracy) on the training set is " + str(training_score) + "\n")
+    # part_3_data_file.write("The performance of the classifier (percent accuracy) on the validation set is " + str(validation_score) + "\n")
+    # part_3_data_file.close()
+    #
+    # ## Display part 4 a)
+    #
+    # theta_image = np.reshape(result_theta, (32, 32))
+    # ## print "img is ", img
+    # ## print "img flatten is ", img.flatten()
+    # imsave("part_4a_full_training.jpg", theta_image)
+    #
+    # two_samples_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell", 2)
+    #
+    # image_two_samples = np.reshape(two_samples_theta, (32, 32))
+    #
+    # imsave("part_4a_2_samples_training.jpg", image_two_samples)
+    #
+    # ## part 4 b)
+    #
+    # new_starting_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell", init_theta_coefficient=0.5)
+    #
+    # image_new_starting_theta = np.reshape(new_starting_theta, (32, 32))
+    # imsave("part_4b_new_start_theta.jpg", image_new_starting_theta)
+    #
+    # foggy_face_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell")
+    # image_foggy_face_theta = np.reshape(foggy_face_theta, (32, 32))
+    # imsave("part_4b_foggy_face.jpg", image_foggy_face_theta)
+    #
+    # ## part 5
+    # part_5_result_theta = classify_gender(actors, actresses, act)
+    # part_5_validation_score, part_5_training_score, different_six_performer_results = get_performance_gender(actors, actresses, act, act_different, actors_different, actresses_different, part_5_result_theta)
+    # print "part 5 validation and training scores are respectively ", part_5_validation_score, part_5_training_score
+    # print "part 5 different_six_performer_results is ", different_six_performer_results
+    #
+    # different_performers_file = open("part_5_different_performer_accuracies.txt", "w")
+    # for key in different_six_performer_results:
+    #     different_performers_file.write(str(key) + " Accuracy is: " + str(different_six_performer_results[key]) + "\n")
+    # different_performers_file.close()
+    #
+    # plot_performance_gender(actors, actresses, act, act_different, actors_different, actresses_different)
 
-    print "Binary Classification Validation and training scores are respectively", validation_score, training_score
-    print "result_cost_training, result_cost_validation", result_cost_training, result_cost_validation
-    part_3_data_file = open("part_3_data_file.txt", "w")
-    part_3_data_file.write("The cost function value for the training set is " + str(result_cost_training) + "\n")
-    part_3_data_file.write("The cost function value for the validation set is " + str(result_cost_validation) + "\n")
-    part_3_data_file.write("The performance of the classifier (percent accuracy) on the training set is " + str(training_score) + "\n")
-    part_3_data_file.write("The performance of the classifier (percent accuracy) on the validation set is " + str(validation_score) + "\n")
-    part_3_data_file.close()
+    ## Part 6
 
-    ## Display part 4 a)
-
-    theta_image = np.reshape(result_theta, (32, 32))
-    ## print "img is ", img
-    ## print "img flatten is ", img.flatten()
-    imsave("part_4a_full_training.jpg", theta_image)
-
-    two_samples_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell", 2)
-
-    image_two_samples = np.reshape(two_samples_theta, (32, 32))
-
-    imsave("part_4a_2_samples_training.jpg", image_two_samples)
-
-    ## part 4 b)
-
-    new_starting_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell", init_theta_coefficient=0.5)
-
-    image_new_starting_theta = np.reshape(new_starting_theta, (32, 32))
-    imsave("part_4b_new_start_theta.jpg", image_new_starting_theta)
-
-    foggy_face_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell")
-    image_foggy_face_theta = np.reshape(foggy_face_theta, (32, 32))
-    imsave("part_4b_foggy_face.jpg", image_foggy_face_theta)
-
-    ## part 5
-    part_5_result_theta = classify_gender(actors, actresses, act)
-    part_5_validation_score, part_5_training_score, different_six_performer_results = get_performance_gender(actors, actresses, act, act_different, actors_different, actresses_different, part_5_result_theta)
-    print "part 5 validation and training scores are respectively ", part_5_validation_score, part_5_training_score
-    print "part 5 different_six_performer_results is ", different_six_performer_results
-
-    different_performers_file = open("part_5_different_performer_accuracies.txt", "w")
-    for key in different_six_performer_results:
-        different_performers_file.write(str(key) + " Accuracy is: " + str(different_six_performer_results[key]) + "\n")
-    different_performers_file.close()
-
-    plot_performance_gender(actors, actresses, act, act_different, actors_different, actresses_different)
+    part_6_finite_difference(f_multiclass, df_multiclass)
