@@ -186,7 +186,10 @@
 
 \begin{homeworkProblem}
 
-\noindent \textit{Dataset description}
+\textbf{Important Note:} For this project, I used \textbf{Python 2.7.14 Anaconda, Inc.} and my system specification development is MacOS Sierra Version 10.12.6. Everything is running fine on this system. \newline
+
+
+\textbf{Note:} I have uploaded the \textbf{cropped} folder to Markus that contains all the cropped images of the actors and actresses. Please put the cropped folder beside \textbf{faces.py} as the \textbf{get\_data.py} script might not get all the images that I have due to time outs and other unforeseeable issues. \newline
 
 I have downloaded $1691$ uncropped images of well-known actors and actresses from FaceScrub using the \textbf{get\_data.py} script.  Figures 1, 2 and 3 shows the uncropped images of Peri Gilpin, Steve Carell and Lorrain Bracco respectively. Figures 4, 5 and 6 show the cropped images of these individuals. In the \textbf{get\_data.py} script I have transformed the raw images in the uncropped folder to grayscale, resized them to 32x32 and cropped them to the faces using the bounded box values. \newline
 
@@ -361,7 +364,7 @@ def binary_classify(performer_1_full, performer_2_full,  training_samples_num=70
 
 \textbf{Description of the process to get the code to work}
 \newline
-I am using the python functions $f$, $df$ and $grad_descent$ from the tutorial code. As I am building the classifier, there were dimension misalignment issues. I had to use the x\_matrix transpose to solve the issue. At first, my alpha was 0.1. I run into the RuntimeWarning: overflow encountered in multiply error. It seems to suggest that the alpha is too large and as a result gradient descent overshoots the minima multiple times and as a result it could not converge. I began to experiment with smaller alphas and eventually chose the alpha value of 0.0000010 as the default. I chose it because it is one of the smallest values for the code to not run forever and it gives a decent set of $\theta$ values for the prediction.
+I am using the python functions $f$, $df$ and $grad_descent$ from the tutorial code. As I am building the classifier, there were dimension misalignment issues. I had to use the x\_matrix transpose to solve the issue. At first, my alpha was 0.1. I run into the RuntimeWarning: overflow encountered in multiply error. It seems to suggest that the alpha is too large and as a result gradient descent overshoots the minima multiple times and as a result it could not converge. If the alpha is too small, it will terminate prematurely since this increases the chance for it to get stuck at a local minimum. I began to experiment with smaller alphas and eventually chose the alpha value of 0.0000010 as the default. I chose it because it is one of the smallest values for the code to not run forever and it gives a decent set of $\theta$ values for the prediction.
 
 \end{homeworkProblem}
 \clearpage
@@ -456,10 +459,10 @@ From \textbf{part a}, we see that the partial derivative of the cost function wi
 
 Note: I omitted the steps for taking the scalars out as they are trivial.
 \[ J(\begin{bmatrix}
-    \theta_{11}       & \theta_{12} & \theta_{13} & \dots & \theta_{1n} \\
-    \theta_{21}       & \theta_{22} & \theta_{23} & \dots & \theta_{2n} \\
+    \theta_{11}       & \theta_{12} & \theta_{13} & \dots & \theta_{1k} \\
+    \theta_{21}       & \theta_{22} & \theta_{23} & \dots & \theta_{2k} \\
     \hdotsfor{5} \\
-    \theta_{k1}       & \theta_{k2} & \theta_{k3} & \dots & \theta_{kn}
+    \theta_{n1}       & \theta_{n2} & \theta_{n3} & \dots & \theta_{nk}
 \end{bmatrix}) = 2(\begin{bmatrix}
     x_{11}       & x_{12} & x_{13} & \dots & x_{1m} \\
     x_{21}       & x_{22} & x_{23} & \dots & x_{2m} \\
@@ -486,32 +489,40 @@ Note: I omitted the steps for taking the scalars out as they are trivial.
 
 
 Now, we can simplify this to,
-$$\frac{\partial J}{\partial \theta} = 2X(\theta^{T}X - Y)^{T}$$
+$$ \nabla J = 2X(\theta^{T}X - Y)^{T}$$
 \newline
 Let $m$ be the number of sample images. \newline
 Let $n$ be the number of features. \newline
 Let $k$ be the number of ways that a label can be different. \newline
 Let $X$ be the $nxm$ matrix that contains all the input data. Each number is a pixel. \newline
 Let $Y$ be the $kxm$ matrix of labels where each row is the label vector. The label vector uniquely identifies the actor/actress \newline
-Let $\theta$ be a $kxn$ matrix
+Let $\theta$ be a $nxk$ matrix \newline
+Let $\theta^{T}$ be a $kxn$ matrix
 \newline
 
-\textbf{Part c}
+\textbf{Part c} \newline
 
 \begin{lstlisting}
+
+The following is my implementation of the cost function and the vectorized form of the gradient. \textbf{f_multiclass} is the cost function and \textbf{df_multiclass} is the gradient.
+
 def f_multiclass(x, y, theta):
     """The multiclass cost function"""
+    print "theta.T", theta.T
+    print "x", x
+    print "dot(theta.T,x)", dot(theta.T,x)
     return sum( (y - dot(theta.T,x)) ** 2)
 
 def df_multiclass(x, y, theta):
     """The multiclass Gradient"""
-    return -2*sum((y.T-dot((theta.T).T, x.T))*x.T, 1)
+    return -2*dot(x, (y-dot(theta.T, x)).T)
 \end{lstlisting}
 
-\textbf{Part d}
-
+\textbf{Part d} \newline
+I used the following code to compute the finite difference gradient matrix using finite difference approximations. This function returns the gradient matrix on the initial thetas calculated using df, finite difference matrix calculated using finite difference with h=0.000000000001 for \textbf{each individual $\theta$} (I append each finite difference value to this finite difference 2D-array matrix) and the comparison matrix which is the difference of the two. The x\_input matrix is the image data, y\_vector label is the same for all images since I used only 5 images of Alec Baldwin. The comparison matrix stores the difference between the gradient matrix and the finite difference matrix. If the gradient is correctly implemented, the values in the comparison matrix should be approaching 0 since the comparison matrix is equal to gradient - finite difference matrix. \newline
 \begin{lstlisting}
-def part_6_finite_difference(f_multiclass, df_multiclass, k=4, init_theta_coefficient=0, alpha=0.0000010):
+def part_6_finite_difference(f_multiclass, df_multiclass, h=0.000000000001, k=4, init_theta_coefficient=0, alpha=0.0000010):
+    """Returns the gradient in matrix form, finite difference in matrix form, and their """
     training_set = []
     # Choose 5 images
     path = "cropped/actors/"
@@ -531,9 +542,119 @@ def part_6_finite_difference(f_multiclass, df_multiclass, k=4, init_theta_coeffi
         initial_theta_row = init_theta_coefficient * np.ones(len(x_matrix[0]))
         initial_theta.append(initial_theta_row)
     initial_theta = np.vstack(initial_theta)
-    y_vector = np.array([[0, 1, 0, 0] for i in range(5)])
-    return grad_descent(f_multiclass, df_multiclass, x_matrix, y_vector, initial_theta, alpha, max_iter=10000)
+    initial_theta = initial_theta.T
+    initial_theta_copy = initial_theta.copy()
+    y_vector = np.array([[0, 1, 0, 0] for i in range(len(x_matrix))])
+    y_vector = np.vstack(y_vector)
+    y_vector = y_vector.T
+    gradient = df_multiclass(x_matrix.T, y_vector, initial_theta)
+    lst_finite_difference = []
+    ## Calculate the finite difference
+    for row_idx in range(len(initial_theta)):
+        lst_row = []
+        for column_idx in range(len(initial_theta[0])):
+            cost_function_original = f_multiclass(x_matrix.T, y_vector, initial_theta_copy)
+            initial_theta_copy[row_idx][column_idx] = initial_theta_copy[row_idx][column_idx] + h
+            cost_function_added_h = f_multiclass(x_matrix.T, y_vector, initial_theta_copy)
+            finite_difference = (cost_function_added_h - cost_function_original) / h
+            print "finite_difference is", finite_difference
+            lst_row.append(finite_difference)
+        lst_finite_difference.append(lst_row)
+    return gradient, lst_finite_difference, gradient - lst_finite_difference
 \end{lstlisting}
+
+As you can see, the comparison matrix values are approaching 0, which means the values in the gradient matrix and the finite difference matrix are very similar. For the gradient and finite difference matrices, you can find the values in the part\_6d\_file.txt
+
+\begin{lstlisting}
+
+comparison matrix is [[ -0.00000000e+00  -1.35560006e-04  -0.00000000e+00  -0.00000000e+00]
+ [ -0.00000000e+00   2.75801237e-07  -0.00000000e+00  -0.00000000e+00]
+ [ -0.00000000e+00  -8.33791115e-05  -0.00000000e+00  -0.00000000e+00]
+ ...,
+ [ -0.00000000e+00  -8.91768193e-04  -0.00000000e+00  -0.00000000e+00]
+ [ -0.00000000e+00   1.02980605e-04  -0.00000000e+00  -0.00000000e+00]
+ [ -0.00000000e+00   7.37151759e-05  -0.00000000e+00  -0.00000000e+00]]
+\end{lstlisting}
+
+I used a very small h since the derivative is defined as h approaching 0. Picking a very small h makes sense in this case for getting a finite difference matrix that is as close as possible to the gradient matrix.
+
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+
+%	PROBLEM 7
+%----------------------------------------------------------------------------------------
+\begin{homeworkProblem}
+The following is the gradient descent code for part 7.: \newline
+
+I used the default alpha value of \textbf{alpha=0.00000005} to run the multi-class gradient descent. I chose this value because values greater than this make the code run for a long time while values less than this causes the gradient descent to terminate very quickly. \newline
+
+The labels I used for the classifier is
+
+\begin{lstlisting}
+six_performer_dict = ({'Lorraine Bracco':     [0, 0, 0, 0, 0, 1],
+                          'Peri Gilpin':      [0, 0, 0, 0, 1, 0],
+                          'Angie Harmon':     [0, 0, 0, 1, 0, 0],
+                          'Alec Baldwin':     [0, 0, 1, 0, 0, 0],
+                          'Bill Hader':       [0, 1, 0, 0, 0, 0],
+                          'Steve Carell':     [1, 0, 0, 0, 0, 0]})
+\end{lstlisting}
+
+The hypothesis should return an array where the index of its maximum element should correspond to the index of 1 in the corresponding actor's label. In other words, the classifier uses the index of the max element in the hypothesis array to identify the actors and actresses in act.
+\newline
+The performance of this multiclass classifier is the following: \newline
+
+\begin{lstlisting}
+The accuracy of the multiclass classifier on the validation set is 0.7
+The accuracy of the multiclass classifier on the training set is 0.757142857143
+\end{lstlisting}
+
+You can generate and see these findings in \textbf{part\_7\_file.txt}
+
+\end{homeworkProblem}
+%----------------------------------------------------------------------------------------
+
+%	PROBLEM 8
+%----------------------------------------------------------------------------------------
+\begin{homeworkProblem}
+
+The following images are composed by the thetas matrix gotten from the multi-class gradient descent. As you can see, they look similar to the actor/actress label that they are corresponding to.
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{part_8_Alec Baldwin.jpg}
+    \caption{Theta Images - Alec Baldwin}
+    \label{fig:baldwin_8}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{part_8_Angie Harmon.jpg}
+    \caption{Theta Images - Angie Harmon}
+    \label{fig:harmon}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{part_8_Bill Hader.jpg}
+    \caption{Theta Images - Bill Hader}
+    \label{fig:hader}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{part_8_Lorraine Bracco.jpg}
+    \caption{Theta Images - Lorraine Bracco}
+    \label{fig:bracco}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{part_8_Peri Gilpin.jpg}
+    \caption{Theta Images - Peri Gilpin}
+    \label{fig:gilpin}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[scale=1]{part_8_Steve Carell.jpg}
+    \caption{Theta Images - Steve Carell}
+    \label{fig:carell}
+\end{figure}
 
 
 \end{homeworkProblem}

@@ -36,13 +36,16 @@ actresses_different = ['America Ferrera', 'Kristin Chenoweth', 'Fran Drescher']
 act_different = ['Gerard Butler', 'Michael Vartan', 'Daniel Radcliffe', 'America Ferrera', 'Kristin Chenoweth', 'Fran Drescher']
 different_performer_dictionary = {}
 
-
+global validation_dictionary
+global training_dictionary
+global test_dictionary
 training_dictionary = {}
 validation_dictionary = {}
 test_dictionary = {}
 
 
 def shuffle_images():
+
     for performer in act:
         if performer in actors:
             path = "cropped/actors"
@@ -55,8 +58,6 @@ def shuffle_images():
             if actor_last_name.lower() in filename:
                 flag = True
                 image_list.append(filename)
-            if actor_last_name.lower() not in filename and flag:
-                break;
         # randomize and shuffle the images
         np.random.shuffle(image_list)
         counter = 0
@@ -91,8 +92,6 @@ def set_up_images_for_different_performers():
             if actor_last_name in filename:
                 flag = True
                 image_list.append(filename)
-            if actor_last_name not in filename and flag:
-                break;
 
         for image in image_list:
             if actor_last_name in different_performer_dictionary:
@@ -107,7 +106,6 @@ def f(x, y, theta):
 
 def df(x, y, theta):
     """The Gradient"""
-    print "x is ", x
     return -2*sum((y-dot(theta.T, x))*x, 1)
 
 def grad_descent(f, df, x, y, init_t, alpha, max_iter=10000):
@@ -179,7 +177,6 @@ def get_performance_binary(performer_1_full, performer_2_full, result_theta):
         if result > 0.5:
             accurate_count_training += 1
 
-    # print "result array is ", result_array
 
     result_array_2 = []
 
@@ -191,7 +188,6 @@ def get_performance_binary(performer_1_full, performer_2_full, result_theta):
         if result <= 0.5:
             accurate_count_training += 1
 
-    # print "result_array_2 is ", result_array_2
 
     accuracy_training = accurate_count_training / float(len(performer_1_training_set) + len(performer_2_training_set))
     return accuracy_validation, accuracy_training
@@ -271,8 +267,6 @@ def binary_classify(performer_1_full, performer_2_full, training_samples_num=70,
 
     x_matrix = np.vstack(training_set) # input x matrix for gradient descent. 70 rows = 70 images. 4096 columns = pixels
     x_matrix_validation = np.vstack(validation_set)
-    # print "sum of x_matrix is:", sum(x_matrix)
-    # print "init_theta_coefficient", init_theta_coefficient
     initial_theta = init_theta_coefficient * np.ones(len(x_matrix[0])) # initial thetas for graident descent
     y_vector = np.ones(performer_1_num_images) # 1 for alec baldwin, 0 for Steve Carell
     y_vector = np.append(y_vector, np.zeros(performer_2_num_images))
@@ -412,7 +406,6 @@ def plot_performance_gender(actors, actresses, act, act_different, actors_differ
     for i in x_axis_sizes:
         result_theta = classify_gender(actors, actresses, act, training_samples_num=i)
         validation_score, training_score, different_six_performer_results = get_performance_gender(actors, actresses, act, act_different, actors_different, actresses_different, result_theta)
-        print "validation_score, training score are", validation_score, training_score
         performance_validation_set.append(validation_score)
         performance_training_set.append(training_score)
 
@@ -431,9 +424,10 @@ def f_multiclass(x, y, theta):
 
 def df_multiclass(x, y, theta):
     """The multiclass Gradient"""
-    return -2*(y-dot(theta.T, x))*x
+    return -2*dot(x, (y-dot(theta.T, x)).T)
 
-def part_6_finite_difference(f_multiclass, df_multiclass, k=4, init_theta_coefficient=0, alpha=0.0000010):
+def part_6_finite_difference(f_multiclass, df_multiclass, h=0.01, k=4, init_theta_coefficient=0, alpha=0.000010):
+    """Returns the gradient in matrix form, finite difference in matrix form, and their """
     training_set = []
     # Choose 5 images
     path = "cropped/actors/"
@@ -453,8 +447,131 @@ def part_6_finite_difference(f_multiclass, df_multiclass, k=4, init_theta_coeffi
         initial_theta_row = init_theta_coefficient * np.ones(len(x_matrix[0]))
         initial_theta.append(initial_theta_row)
     initial_theta = np.vstack(initial_theta)
-    y_vector = np.array([[0, 1, 0, 0] for i in range(5)])
-    return grad_descent(f_multiclass, df_multiclass, x_matrix, y_vector, initial_theta, alpha, max_iter=10000)
+    initial_theta = initial_theta.T
+    initial_theta_copy = initial_theta.copy()
+    y_vector = np.array([[0, 1, 0, 0] for i in range(len(x_matrix))])
+    y_vector = np.vstack(y_vector)
+    y_vector = y_vector.T
+    gradient = df_multiclass(x_matrix.T, y_vector, initial_theta)
+    lst_finite_difference = []
+    ## Calculate the finite difference.
+    for row_idx in range(len(initial_theta)):
+        lst_row = []
+        for column_idx in range(len(initial_theta[0])):
+            cost_function_original = f_multiclass(x_matrix.T, y_vector, initial_theta_copy)
+            initial_theta_copy[row_idx][column_idx] = initial_theta_copy[row_idx][column_idx] + h
+            cost_function_added_h = f_multiclass(x_matrix.T, y_vector, initial_theta_copy)
+            finite_difference = (cost_function_added_h - cost_function_original) / h
+            lst_row.append(finite_difference)
+            initial_theta_copy = initial_theta.copy()
+        lst_finite_difference.append(lst_row)
+    return gradient, lst_finite_difference, gradient - lst_finite_difference
+
+def classify_multiclass(actors, actresses, act, f_multiclass, df_multiclass, training_samples_num=70, k=6, init_theta_coefficient=0, alpha=0.00000005):
+    six_performer_dict = ({'Lorraine Bracco': [0, 0, 0, 0, 0, 1],
+                          'Peri Gilpin':      [0, 0, 0, 0, 1, 0],
+                          'Angie Harmon':     [0, 0, 0, 1, 0, 0],
+                          'Alec Baldwin':     [0, 0, 1, 0, 0, 0],
+                          'Bill Hader':       [0, 1, 0, 0, 0, 0],
+                          'Steve Carell':     [1, 0, 0, 0, 0, 0]})
+    training_set = []
+    y_vector_list = []
+
+    for performer in act:
+        if performer in actors:
+            path = "cropped/actors/"
+        else:
+            path = "cropped/actresses/"
+        performer_last = performer.split(" ")[1].lower()
+        # Set of images for the performer
+        images = training_dictionary[performer_last]
+        num_images = 0
+        for image_name in images:
+            if num_images > training_samples_num:
+                break
+            path_image = path + image_name
+            image_file = imread(path_image)[:, :, 0]
+            # Get the flatten image of inputs
+            flatten_image = image_file.flatten()
+            flatten_image_processed = flatten_image / 255.0  # so that each input is between 0 and 1
+            training_set.append(flatten_image_processed) # training set 2D array
+            num_images += 1
+            label_array = six_performer_dict[performer]
+            y_vector_list.append(label_array)
+
+    x_matrix = np.vstack(training_set)
+    initial_theta = []
+    for i in range(k):
+        initial_theta_row = init_theta_coefficient * np.ones(len(x_matrix[0]))
+        initial_theta.append(initial_theta_row)
+    initial_theta = np.vstack(initial_theta)
+    initial_theta = initial_theta.T
+    initial_theta_copy = initial_theta.copy()
+    # Construct the y label vector
+    y_vector = np.array(y_vector_list)
+    y_vector = np.vstack(y_vector)
+    y_vector = y_vector.T
+    result_theta = grad_descent(f_multiclass, df_multiclass, x_matrix.T, y_vector, initial_theta, alpha)
+    return result_theta
+
+def get_performance_multiclass(actors, actresses, act, result_theta):
+    """Returns the accuracy of the training sets and validation sets"""
+    accurate_count_validation = 0
+    accurate_count_training = 0
+    image_number_validation = 0
+    image_number_training = 0
+
+    six_performer_dict = ({'Lorraine Bracco': [0, 0, 0, 0, 0, 1],
+                          'Peri Gilpin':      [0, 0, 0, 0, 1, 0],
+                          'Angie Harmon':     [0, 0, 0, 1, 0, 0],
+                          'Alec Baldwin':     [0, 0, 1, 0, 0, 0],
+                          'Bill Hader':       [0, 1, 0, 0, 0, 0],
+                          'Steve Carell':     [1, 0, 0, 0, 0, 0]})
+
+    six_performer_max_index = ({'Lorraine Bracco': 5,
+                          'Peri Gilpin':       4,
+                          'Angie Harmon':      3,
+                          'Alec Baldwin':      2,
+                          'Bill Hader':        1,
+                          'Steve Carell':      0})
+
+    for performer in act:
+        if performer in actors or performer in actors_different:
+            path = "cropped/actors/"
+        else:
+            path = "cropped/actresses/"
+        threshold = 0.5 # > 0.5 implies Male, < 0.5 implies female. y = 1 <==> Male; y = 0 <==> Female
+        performer_last_name = performer.split(" ")[1].lower()
+
+        performer_validation_set = validation_dictionary[performer_last_name]
+        performer_training_set = training_dictionary[performer_last_name]
+
+        # validation set accuracy
+        for image in performer_validation_set:
+            path_image = path + image
+            img = imread(path_image)[:, :, 0]
+            flatten_image = img.flatten() / 255.0
+            result = hypothesis(result_theta, flatten_image)
+            max_index = result.tolist().index(max(result.tolist()))
+            if max_index == six_performer_max_index[performer]:
+                accurate_count_validation += 1
+            image_number_validation += 1
+
+        # training set accuracy
+        for image in performer_training_set:
+            path_image = path + image
+            img = imread(path_image)[:, :, 0]
+            flatten_image = img.flatten() / 255.0
+            result = hypothesis(result_theta, flatten_image)
+            max_index = result.tolist().index(max(result.tolist()))
+            if max_index == six_performer_max_index[performer]:
+                accurate_count_training += 1
+            image_number_training += 1
+
+    accuracy_validation = accurate_count_validation / float(image_number_validation)
+    accuracy_training = accurate_count_training / float(image_number_training)
+
+    return accuracy_validation, accuracy_training
 
 
 if __name__ == "__main__":
@@ -467,56 +584,74 @@ if __name__ == "__main__":
     ## Set up the different_performer_dictionary for performers not in act
     set_up_images_for_different_performers()
 
-    # ## Part 3 - Create a classifier and report performance scores
-    # result_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell")
-    # validation_score, training_score = get_performance_binary("Alec Baldwin", "Steve Carell", result_theta)
-    #
-    # print "Binary Classification Validation and training scores are respectively", validation_score, training_score
-    # print "result_cost_training, result_cost_validation", result_cost_training, result_cost_validation
-    # part_3_data_file = open("part_3_data_file.txt", "w")
-    # part_3_data_file.write("The cost function value for the training set is " + str(result_cost_training) + "\n")
-    # part_3_data_file.write("The cost function value for the validation set is " + str(result_cost_validation) + "\n")
-    # part_3_data_file.write("The performance of the classifier (percent accuracy) on the training set is " + str(training_score) + "\n")
-    # part_3_data_file.write("The performance of the classifier (percent accuracy) on the validation set is " + str(validation_score) + "\n")
-    # part_3_data_file.close()
-    #
-    # ## Display part 4 a)
-    #
-    # theta_image = np.reshape(result_theta, (32, 32))
-    # ## print "img is ", img
-    # ## print "img flatten is ", img.flatten()
-    # imsave("part_4a_full_training.jpg", theta_image)
-    #
-    # two_samples_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell", 2)
-    #
-    # image_two_samples = np.reshape(two_samples_theta, (32, 32))
-    #
-    # imsave("part_4a_2_samples_training.jpg", image_two_samples)
-    #
-    # ## part 4 b)
-    #
-    # new_starting_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell", init_theta_coefficient=0.5)
-    #
-    # image_new_starting_theta = np.reshape(new_starting_theta, (32, 32))
-    # imsave("part_4b_new_start_theta.jpg", image_new_starting_theta)
-    #
-    # foggy_face_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell")
-    # image_foggy_face_theta = np.reshape(foggy_face_theta, (32, 32))
-    # imsave("part_4b_foggy_face.jpg", image_foggy_face_theta)
-    #
-    # ## part 5
-    # part_5_result_theta = classify_gender(actors, actresses, act)
-    # part_5_validation_score, part_5_training_score, different_six_performer_results = get_performance_gender(actors, actresses, act, act_different, actors_different, actresses_different, part_5_result_theta)
-    # print "part 5 validation and training scores are respectively ", part_5_validation_score, part_5_training_score
-    # print "part 5 different_six_performer_results is ", different_six_performer_results
-    #
-    # different_performers_file = open("part_5_different_performer_accuracies.txt", "w")
-    # for key in different_six_performer_results:
-    #     different_performers_file.write(str(key) + " Accuracy is: " + str(different_six_performer_results[key]) + "\n")
-    # different_performers_file.close()
-    #
-    # plot_performance_gender(actors, actresses, act, act_different, actors_different, actresses_different)
+    ## Part 3 - Create a classifier and report performance scores
+    result_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell")
+    validation_score, training_score = get_performance_binary("Alec Baldwin", "Steve Carell", result_theta)
 
-    ## Part 6
+    part_3_data_file = open("part_3_data_file.txt", "w")
+    part_3_data_file.write("The cost function value for the training set is " + str(result_cost_training) + "\n")
+    part_3_data_file.write("The cost function value for the validation set is " + str(result_cost_validation) + "\n")
+    part_3_data_file.write("The performance of the classifier (percent accuracy) on the training set is " + str(training_score) + "\n")
+    part_3_data_file.write("The performance of the classifier (percent accuracy) on the validation set is " + str(validation_score) + "\n")
+    part_3_data_file.close()
 
-    part_6_finite_difference(f_multiclass, df_multiclass)
+    ## Display part 4 a)
+
+    theta_image = np.reshape(result_theta, (32, 32))
+    imsave("part_4a_full_training.jpg", theta_image)
+
+    two_samples_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell", 2)
+
+    image_two_samples = np.reshape(two_samples_theta, (32, 32))
+
+    imsave("part_4a_2_samples_training.jpg", image_two_samples)
+
+    ## part 4 b)
+
+    new_starting_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell", init_theta_coefficient=0.5)
+
+    image_new_starting_theta = np.reshape(new_starting_theta, (32, 32))
+    imsave("part_4b_new_start_theta.jpg", image_new_starting_theta)
+
+    foggy_face_theta, result_cost_training, result_cost_validation = binary_classify("Alec Baldwin", "Steve Carell")
+    image_foggy_face_theta = np.reshape(foggy_face_theta, (32, 32))
+    imsave("part_4b_foggy_face.jpg", image_foggy_face_theta)
+
+    ## part 5
+    part_5_result_theta = classify_gender(actors, actresses, act)
+    part_5_validation_score, part_5_training_score, different_six_performer_results = get_performance_gender(actors, actresses, act, act_different, actors_different, actresses_different, part_5_result_theta)
+
+    different_performers_file = open("part_5_different_performer_accuracies.txt", "w")
+    for key in different_six_performer_results:
+        different_performers_file.write(str(key) + " Accuracy is: " + str(different_six_performer_results[key]) + "\n")
+    different_performers_file.close()
+
+    plot_performance_gender(actors, actresses, act, act_different, actors_different, actresses_different)
+
+    # Part 6
+
+    gradient_matrix, finite_difference_matrix, comparison_matrix = part_6_finite_difference(f_multiclass, df_multiclass)
+    part_6d_file = open("part_6d_file.txt", "w")
+    part_6d_file.write("gradient_matrix " + str(gradient_matrix) + "\n")
+    part_6d_file.write("lst_finite_difference matrix is " + str(finite_difference_matrix) + "\n")
+    part_6d_file.write("comparison matrix is " + str(comparison_matrix) + "\n")
+    part_6d_file.close()
+
+
+    ## Part 7
+    result_theta_multiclass = classify_multiclass(actors, actresses, act, f_multiclass, df_multiclass)
+    accuracy_validation_multiclass, accuracy_training_multiclass = get_performance_multiclass(actors, actresses, act, result_theta_multiclass)
+
+    part_7_file = open("part_7_file", "w")
+    part_7_file.write("The accuracy of the multiclass classifier on the validation set is " + str(accuracy_validation_multiclass) + '\n')
+    part_7_file.write("The accuracy of the multiclass classifier on the training set is " + str(accuracy_training_multiclass) + '\n')
+    part_7_file.close()
+
+    ## part 8
+
+    actors = ['Steve Carell', 'Bill Hader', 'Alec Baldwin', 'Angie Harmon', 'Peri Gilpin', 'Lorraine Bracco']
+    idx = 0
+    for column in result_theta_multiclass.T:
+        theta_image_row = np.reshape(column, (32, 32))
+        imsave("part_8_" + actors[idx] + '.jpg', theta_image_row)
+        idx += 1
